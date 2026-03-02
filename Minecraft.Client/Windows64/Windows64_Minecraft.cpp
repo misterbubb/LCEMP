@@ -974,22 +974,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	ProfileManager.RegisterAward(eAward_socialPost,			0,									eAwardType_Theme,false,app.GetStringTable(),IDS_AWARD_TITLE,IDS_AWARD_THEME,IDS_CONFIRM_OK,THEME_NAME,THEME_FILESIZE);
 
-	// Rich Presence init - number of presences, number of contexts
+	//Rich Presence init - number of presences, number of contexts
 	ProfileManager.RichPresenceInit(4,1);
 	ProfileManager.RegisterRichPresenceContext(CONTEXT_GAME_STATE);
-
-	// Ensure the GameHDD save directory exists at runtime (the 4J_Storage lib expects it)
-	{
-		wchar_t exePath[MAX_PATH];
-		GetModuleFileNameW(NULL, exePath, MAX_PATH);
-		wstring exeDir(exePath);
-		size_t lastSlash = exeDir.find_last_of(L"\\/");
-		if (lastSlash != wstring::npos)
-			exeDir = exeDir.substr(0, lastSlash);
-		wstring gameHDDPath = exeDir + L"\\Windows64\\GameHDD";
-		CreateDirectoryW((exeDir + L"\\Windows64").c_str(), NULL);
-		CreateDirectoryW(gameHDDPath.c_str(), NULL);
-	}
 
 	// initialise the storage manager with a default save display name, a Minimum save size, and a callback for displaying the saving message
 	StorageManager.Init(app.GetString(IDS_DEFAULT_SAVENAME),"savegame.dat",FIFTY_ONE_MB,&CConsoleMinecraftApp::DisplaySavingMessage,(LPVOID)&app);
@@ -1003,6 +990,22 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	ProfileManager.SetNotificationsCallback(&CConsoleMinecraftApp::NotificationsCallback,(LPVOID)&app);
 
 #endif
+
+	// Ensure the GameHDD save directory exists at runtime (the 4J_Storage lib expects it)
+	{
+		wchar_t exePath[MAX_PATH];
+		if (GetModuleFileNameW(NULL, exePath, MAX_PATH))
+		{
+			wstring exeDir(exePath);
+			size_t lastSlash = exeDir.find_last_of(L"\\/");
+			if (lastSlash != wstring::npos)
+				exeDir = exeDir.substr(0, lastSlash);
+			wstring gameHDDPath = exeDir + L"\\Windows64\\GameHDD";
+			CreateDirectoryW((exeDir + L"\\Windows64").c_str(), NULL);
+			CreateDirectoryW(gameHDDPath.c_str(), NULL);
+		}
+	}
+
 	// Set a callback for the default player options to be set - when there is no profile data for the player
 	ProfileManager.SetDefaultOptionsCallback(&CConsoleMinecraftApp::DefaultOptionsCallback,(LPVOID)&app);
 #if 0
